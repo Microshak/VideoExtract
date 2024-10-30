@@ -1,0 +1,51 @@
+# Use root/example as user/password credentials
+version: '3.1'
+
+services:
+
+  mongo:
+    image: mongodb/mongodb-atlas-local
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: BamBamBam
+    user: root
+    ports:
+      - 27017:27017
+    volumes:
+      - type: bind
+        source: data
+        target: /data/db
+
+    
+
+  notebook:
+      deploy:
+          resources:
+              reservations:
+                  devices:
+                      - driver: nvidia
+                        count: all
+                        capabilities:
+                            - gpu
+      stdin_open: true
+      tty: true
+      build:
+        context: .
+        dockerfile: Dockerfile.Juypter
+      volumes:
+        - type: bind
+          source: notebooks
+          target: /home/yovyan/work
+      ports:
+      - 8888:8888
+      environment:
+        MONGODB_USERNAME: root
+        MONGODB_PASSWORD: BamBamBam@mongo
+        MONGODB_URL: mongodb://root:BamBamBam@mongo:27017/
+    
+
+volumes:
+  notebooks:
+
+  data:
